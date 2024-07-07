@@ -18,7 +18,7 @@ search_box = driver.find_element(By.ID, "twotabsearchtextbox")
 search_box.send_keys("livros sobre automacao")
 search_box.submit()
 
-time.sleep(3)  # Aguarde alguns segundos para a página carregar
+time.sleep(5)  # Aguarde alguns segundos para a página carregar
 
 books = []
 
@@ -66,7 +66,7 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
             book.find_element(By.CSS_SELECTOR, ".a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal").click()
             
             # Aguardar carregamento da página do produto
-            time.sleep(3)
+            time.sleep(5)
             
             # Tentativa de capturar o preço da capa comum na página do produto
             try:
@@ -81,7 +81,7 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
             book.find_element(By.CSS_SELECTOR, ".a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal").click()
             
             # Aguardar carregamento da página do produto
-            time.sleep(3)
+            time.sleep(5)
             
             # Tentativa de capturar o preço da capa comum na página do produto
             try:
@@ -107,8 +107,12 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
 # Feche o navegador
 driver.quit()
 
+
 # Crie um DataFrame pandas e salve os dados em um arquivo CSV
 df = pd.DataFrame(books)
+# Filtra apenas os livros onde o título não é 'N/A'
+df = df[df["Título"] != "N/A"]
+# Ordena
 df.sort_values("Título", inplace=True)
 # Exporta para csv
 df.to_csv("livros_amazon.csv", index=False)
