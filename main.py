@@ -1,3 +1,4 @@
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -33,25 +34,23 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
     except:
         author = "N/A"
     
-    # Tentativa de capturar o preço principal
+    # Capturar o preço principal
     try:
         price_whole = book.find_element(By.CSS_SELECTOR, ".a-price .a-price-whole").text
         price_fraction = book.find_element(By.CSS_SELECTOR, ".a-price .a-price-fraction").text
         price = f"{price_whole},{price_fraction}"
+         # Verificar se o preço é de kindleUnlimited "0,00" e também capturar o preço de compra normal
+        if price == "0,00":
+            alt_price_text = book.find_element(By.CSS_SELECTOR, "div[data-cy='secondary-offer-recipe'] .a-row.a-size-base.a-color-secondary span").text
+            # Plus: Fiz a utilização da biblioteca "re" para filtrar apenas os números e mostrar os dois valores caso seja kindle 
+            price_match = re.search(r'R\$\s*([\d,]+)', alt_price_text)
+            if price_match:
+                alt_price = price_match.group(1)
+            else:
+                alt_price = "N/A"
+            price = f"Kindle Unlimited: {price} Ou para comprar: R$ {alt_price}"
     except:
-        # Tentativa de capturar o preço de capa comum
-        try:
-            price = book.find_element(By.CSS_SELECTOR, ".slot-price").text
-        except:
-            # Tentativa de capturar o preço da versão Kindle
-            try:
-                price = book.find_element(By.CSS_SELECTOR, ".a-size-base.a-color-price.a-color-price").text
-            except:
-                # Tentativa de capturar o preço dentro de ".a-row a-size-base a-color-secondary"
-                try:
-                    price = book.find_element(By.CSS_SELECTOR, ".a-row.a-size-base.a-color-secondary").text
-                except:
-                    price = "N/A"
+        price = "N/A"
     
     try:
         rating = book.find_element(By.CSS_SELECTOR, ".a-icon-alt").get_attribute("innerHTML")
@@ -60,6 +59,7 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
     
     try:
         reviews = book.find_element(By.CSS_SELECTOR, ".a-size-small .a-link-normal").text
+
         if reviews == "Capa Comum":
             # Clicar no título para acessar a página do produto
             book.find_element(By.CSS_SELECTOR, ".a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal").click()
@@ -75,6 +75,23 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
             
             # Voltar para a página de resultados
             driver.back()
+        elif reviews == "Kindle":
+            # Clicar no título para acessar a página do produto
+            book.find_element(By.CSS_SELECTOR, ".a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal").click()
+            
+            # Aguardar carregamento da página do produto
+            time.sleep(3)
+            
+            # Tentativa de capturar o preço da capa comum na página do produto
+            try:
+                price = driver.find_element(By.CSS_SELECTOR, ".a-size-base.a-color-price").text
+            except:
+                price = "N/A"
+            
+            # Voltar para a página de resultados
+            driver.back()
+        else:
+            reviews = book.find_element(By.CSS_SELECTOR, ".a-size-small .a-link-normal").text
     except:
         reviews = "N/A"
         
