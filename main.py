@@ -51,15 +51,16 @@ for book in driver.find_elements(By.CSS_SELECTOR, ".s-main-slot .s-result-item")
             price = f"Kindle Unlimited: {price} Ou para comprar: R$ {alt_price}"
     except:
         price = "N/A"
-    
+
+    # Captura a nota
     try:
         rating = book.find_element(By.CSS_SELECTOR, ".a-icon-alt").get_attribute("innerHTML")
     except:
         rating = "N/A"
     
+    # verifica se no parâmetro pego por "reviews" traz a opção de "Capa comum ou Kindle", entra no link e captura o valor da capa comum ou kindle
     try:
         reviews = book.find_element(By.CSS_SELECTOR, ".a-size-small .a-link-normal").text
-
         if reviews == "Capa Comum":
             # Clicar no título para acessar a página do produto
             book.find_element(By.CSS_SELECTOR, ".a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal").click()
@@ -109,6 +110,9 @@ driver.quit()
 # Crie um DataFrame pandas e salve os dados em um arquivo CSV
 df = pd.DataFrame(books)
 df.sort_values("Título", inplace=True)
+# Exporta para csv
 df.to_csv("livros_amazon.csv", index=False)
+# Exportar para Excel
+df.to_excel("livros_amazon.xlsx", index=False)
 
 print("Dados coletados e salvos em livros_amazon.csv")
